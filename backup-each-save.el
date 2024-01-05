@@ -1,10 +1,10 @@
-;;; backup-each-save.el --- backup each savepoint of a file
+;;; backup-each-save.el --- backup each savepoint of a file -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004, 2024  Free Software Foundation, Inc.
 
 ;; Author: Benjamin Rutt <brutt@bloomington.in.us>
 ;; Maintainer: Conor Nash <conor@nashcobusinessservicesllc.com>
-;; Version: 1.4
+;; Version: 1.5
 ;; Package-Requires: ((emacs "24.1"))
 
 ;; This file is free software; you can redistribute it and/or modify
