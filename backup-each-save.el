@@ -71,7 +71,8 @@
 
 ;;; Code:
 
-(defvar backup-each-save-mirror-location "~/.backups")
+(defvar backup-each-save-mirror-location "~/.backups"
+  "Location of backup files.")
 
 (defvar backup-each-save-remote-files
   nil
@@ -107,15 +108,17 @@ on the system \"/user@host:\"."
 
 ;;;###autoload
 (defun backup-each-save ()
+  "Backs up current file into `backup-each-save-mirror-location'."
   (let ((bfn (buffer-file-name)))
     (when (and (or backup-each-save-remote-files
                    (not (file-remote-p bfn)))
                (funcall backup-each-save-filter-function bfn)
                (or (not backup-each-save-size-limit)
                    (<= (buffer-size) backup-each-save-size-limit)))
-      (copy-file bfn (backup-each-save-compute-location bfn) t t t))))
+      (copy-file bfn (backup-each-save--compute-location bfn) t t t))))
 
-(defun backup-each-save-compute-location (filename)
+(defun backup-each-save--compute-location (filename)
+  "Determine the destination path for the backup of FILENAME."
   (let* ((containing-dir (file-name-directory filename))
          (basename (file-name-nondirectory filename))
          (backup-container
