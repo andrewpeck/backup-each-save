@@ -72,7 +72,7 @@
 
 ;;; Code:
 
-(defvar backup-each-save-mirror-location "~/.backups"
+(defvar backup-each-save-mirror-location "~/.emacs-backups"
   "Location of backup files.")
 
 (defvar backup-each-save-remote-files
