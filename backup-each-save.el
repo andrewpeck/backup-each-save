@@ -72,25 +72,34 @@
 
 ;;; Code:
 
-(defvar backup-each-save-mirror-location "~/.emacs-backups"
-  "Location of backup files.")
+(defgroup backup-each-save nil
+  "Toggle Python strings between implicit concatenation and triple-quoted."
+  :group 'backup
+  :prefix "backup-each-save-")
 
-(defvar backup-each-save-remote-files
-  nil
-  "Whether to backup remote files at each save. Defaults to nil.")
+(defcustom backup-each-save-mirror-location "~/.emacs-backups"
+  "Location to save backup files."
+  :type 'string)
 
-(defvar backup-each-save-time-format "%Y_%m_%d_%H_%M_%S"
-  "Format given to `format-time-string' which is appended to the filename.")
+(defcustom backup-each-save-remote-files nil
+  "Whether to backup remote files at each save. Defaults to nil."
+  :type 'boolean)
 
-(defvar backup-each-save-filter-function 'identity
-  "Function which should return non-nil if the file should be backed up.")
+(defcustom backup-each-save-time-format "%Y_%m_%d_%H_%M_%S"
+  "Format given to `format-time-string' which is appended to the filename."
+  :type 'string)
 
-(defvar backup-each-save-size-limit 500000
+(defcustom backup-each-save-filter-function 'identity
+  "Function which should return non-nil if the file should be backed up."
+  :type 'function)
+
+(defcustom backup-each-save-size-limit 500000
   "Maximum size of a file (in bytes) that should be copied at each savepoint.
 
 If a file is greater than this size, don't make a backup of it.
 Setting this variable to nil disables backup suppressions based
-on size.")
+on size."
+  :type 'number)
 
 ;;;###autoload
 (defun backup-each-save ()
