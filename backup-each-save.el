@@ -5,7 +5,7 @@
 ;; Author: Benjamin Rutt <brutt@bloomington.in.us>
 ;; Maintainer: Conor Nash <conor@nashcobusinessservicesllc.com>
 ;; Version: 1.5
-;; Package-Requires: ((emacs "24.1"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -81,6 +81,12 @@
   "Location to save backup files."
   :type 'string)
 
+(defcustom backup-each-save-ignored-directories nil
+  "List of paths to be ignored for backups.
+
+Can be used e.g. for sensitive or unimportant files."
+  :type '(repeat string))
+
 (defcustom backup-each-save-remote-files nil
   "Whether to backup remote files at each save. Defaults to nil."
   :type 'boolean)
@@ -105,11 +111,16 @@ on size."
 (defun backup-each-save ()
   "Backs up current file into `backup-each-save-mirror-location'."
   (let ((bfn (buffer-file-name)))
-    (when (and (or backup-each-save-remote-files
-                   (not (file-remote-p bfn)))
-               (funcall backup-each-save-filter-function bfn)
-               (or (not backup-each-save-size-limit)
-                   (<= (buffer-size) backup-each-save-size-limit)))
+    (when (and
+           (not (and backup-each-save-ignored-directories
+                     (seq-some #'identity
+                               (mapcar (lambda (p) (file-in-directory-p bfn p))
+                                       backup-each-save-ignored-directories))))
+           (or backup-each-save-remote-files
+               (not (file-remote-p bfn)))
+           (funcall backup-each-save-filter-function bfn)
+           (or (not backup-each-save-size-limit)
+               (<= (buffer-size) backup-each-save-size-limit)))
       (copy-file bfn (backup-each-save--compute-location bfn) t t t))))
 
 (defun backup-each-save--compute-location (filename)
