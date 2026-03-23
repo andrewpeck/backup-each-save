@@ -77,6 +77,9 @@
   :group 'backup
   :prefix "backup-each-save-")
 
+(defvar backup-each-save-local-disable nil
+  "Set local variable to t to disable backups.")
+
 (defcustom backup-each-save-mirror-location "~/.emacs-backups"
   "Location to save backup files."
   :type 'string)
@@ -112,6 +115,7 @@ on size."
   "Backs up current file into `backup-each-save-mirror-location'."
   (let ((bfn (buffer-file-name)))
     (when (and
+           (not backup-each-save-local-disable)
            (not (and backup-each-save-ignored-directories
                      (seq-some #'identity
                                (mapcar (lambda (p) (file-in-directory-p bfn p))
