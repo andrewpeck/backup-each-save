@@ -90,6 +90,12 @@
 Can be used e.g. for sensitive or unimportant files."
   :type '(repeat string))
 
+(defcustom backup-each-save-ignored-regexps nil
+  "List of regexps to be ignored for backups.
+
+Can be used e.g. for sensitive or unimportant files."
+  :type '(repeat string))
+
 (defcustom backup-each-save-remote-files nil
   "Whether to backup remote files at each save. Defaults to nil."
   :type 'boolean)
@@ -120,6 +126,10 @@ on size."
                      (seq-some #'identity
                                (mapcar (lambda (p) (file-in-directory-p bfn p))
                                        backup-each-save-ignored-directories))))
+           (not (and backup-each-save-ignored-regexps
+                     (seq-some #'identity
+                               (mapcar (lambda (re) (string-match re bfn))
+                                       backup-each-save-ignored-regexps))))
            (or backup-each-save-remote-files
                (not (file-remote-p bfn)))
            (funcall backup-each-save-filter-function bfn)
