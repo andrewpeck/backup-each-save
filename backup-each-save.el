@@ -69,6 +69,8 @@
 ;;                    being activated
 ;; v1.2 -> v1.3:  fix for some emacsen not having `file-remote-p'
 ;; v1.3 -> v1.4: added footer and autoload
+;; v1.4 -> v1.5: add options for ignoring directories
+;; v1.5 -> v1.6: add tests, cleanup source
 
 ;;; Code:
 
