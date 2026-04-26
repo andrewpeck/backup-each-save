@@ -4,7 +4,7 @@
 
 ;; Author: Benjamin Rutt <brutt@bloomington.in.us>
 ;; Maintainer: Conor Nash <conor@nashcobusinessservicesllc.com>
-;; Version: 1.5
+;; Version: 1.6
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -73,40 +73,48 @@
 ;;; Code:
 
 (defgroup backup-each-save nil
-  "Toggle Python strings between implicit concatenation and triple-quoted."
+  "Backup each save of a file to a mirror directory."
   :group 'backup
   :prefix "backup-each-save-")
 
-(defvar backup-each-save-local-disable nil
-  "Set local variable to t to disable backups.")
+(defcustom backup-each-save-local-disable nil
+  "Set local variable to t to disable backups."
+  :type 'boolean
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-mirror-location "~/.emacs-backups"
   "Location to save backup files."
-  :type 'string)
+  :type 'string
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-ignored-directories nil
   "List of paths to be ignored for backups.
 
 Can be used e.g. for sensitive or unimportant files."
-  :type '(repeat string))
+  :type '(repeat directory)
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-ignored-regexps nil
   "List of regexps to be ignored for backups.
 
 Can be used e.g. for sensitive or unimportant files."
-  :type '(repeat string))
+  :type '(repeat string)
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-remote-files nil
-  "Whether to backup remote files at each save. Defaults to nil."
-  :type 'boolean)
+  "Whether to backup remote files at each save."
+  :type 'boolean
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-time-format "%Y_%m_%d_%H_%M_%S"
   "Format given to `format-time-string' which is appended to the filename."
-  :type 'string)
+  :type 'string
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-filter-function 'identity
   "Function which should return non-nil if the file should be backed up."
-  :type 'function)
+  :type 'function
+  :group 'backup-each-save)
 
 (defcustom backup-each-save-size-limit 500000
   "Maximum size of a file (in bytes) that should be copied at each savepoint.
@@ -114,7 +122,9 @@ Can be used e.g. for sensitive or unimportant files."
 If a file is greater than this size, don't make a backup of it.
 Setting this variable to nil disables backup suppressions based
 on size."
-  :type 'number)
+  :type '(choice (const :tag "Unlimited" nil) (integer :tag "Bytes"))
+  :group 'backup-each-save)
+
 
 ;;;###autoload
 (defun backup-each-save ()
