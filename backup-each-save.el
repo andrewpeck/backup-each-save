@@ -125,40 +125,50 @@ on size."
   :type '(choice (const :tag "Unlimited" nil) (integer :tag "Bytes"))
   :group 'backup-each-save)
 
+(defun backup-each-save--backup-p (file)
+  "Check if a backup should be done for the given FILE.
+
+Check is based on ignored directories, regex patterns, remote file
+settings, a custom filter function, and size limit. This function
+returns non-nil if the backup should proceed and nil otherwise."
+  (and (not backup-each-save-local-disable)
+       (not (and backup-each-save-ignored-directories
+                 (seq-some #'identity
+                           (mapcar (lambda (p) (file-in-directory-p file (expand-file-name p)))
+                                   backup-each-save-ignored-directories))))
+       (not (and backup-each-save-ignored-regexps
+                 (seq-some #'identity
+                           (mapcar (lambda (re) (string-match-p re file))
+                                   backup-each-save-ignored-regexps))))
+       (or backup-each-save-remote-files
+           (not (file-remote-p file)))
+       (funcall backup-each-save-filter-function file)
+       (or (not backup-each-save-size-limit)
+           (<= (buffer-size) backup-each-save-size-limit))))
 
 ;;;###autoload
 (defun backup-each-save ()
   "Backs up current file into `backup-each-save-mirror-location'."
   (let ((bfn (buffer-file-name)))
-    (when (and
-           (not backup-each-save-local-disable)
-           (not (and backup-each-save-ignored-directories
-                     (seq-some #'identity
-                               (mapcar (lambda (p) (file-in-directory-p bfn p))
-                                       backup-each-save-ignored-directories))))
-           (not (and backup-each-save-ignored-regexps
-                     (seq-some #'identity
-                               (mapcar (lambda (re) (string-match re bfn))
-                                       backup-each-save-ignored-regexps))))
-           (or backup-each-save-remote-files
-               (not (file-remote-p bfn)))
-           (funcall backup-each-save-filter-function bfn)
-           (or (not backup-each-save-size-limit)
-               (<= (buffer-size) backup-each-save-size-limit)))
-      (copy-file bfn (backup-each-save--compute-location bfn) t t t))))
+    (when (and bfn (backup-each-save--backup-p bfn))
+      (let ((location (backup-each-save--compute-location bfn)))
+        (make-directory (file-name-directory location) t)
+        (copy-file bfn location t t t)))))
 
 (defun backup-each-save--compute-location (filename)
   "Determine the destination path for the backup of FILENAME."
   (let* ((containing-dir (file-name-directory filename))
          (basename (file-name-nondirectory filename))
+         (mirror (expand-file-name backup-each-save-mirror-location))
          (backup-container
-          (format "%s/%s"
-                  backup-each-save-mirror-location
-                  containing-dir)))
-    (unless (file-exists-p backup-container)
-      (make-directory backup-container t))
-    (format "%s/%s-%s" backup-container basename
-            (format-time-string backup-each-save-time-format))))
+          (expand-file-name
+           (if (string-prefix-p "/" containing-dir)
+               (substring containing-dir 1)
+             containing-dir)
+           mirror)))
+    (expand-file-name
+     (concat basename "-" (format-time-string backup-each-save-time-format))
+     backup-container)))
 
 (provide 'backup-each-save)
 ;;; backup-each-save.el ends here
